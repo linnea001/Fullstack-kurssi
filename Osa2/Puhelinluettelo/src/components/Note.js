@@ -1,9 +1,9 @@
-//teht 2.6-2.10
+//puhelinluettelo
 import React from 'react'
 
-const Note = ({note, number}) => {
+const Note = ({note, number, deletePerson}) => {
   return (
-    <div>{note} {number}</div>
+    <div><button onClick={deletePerson}>Poista</button> {note} {number}</div>
     )
 }
 

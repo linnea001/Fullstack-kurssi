@@ -1,23 +1,29 @@
-//teht2.6-2.10
+//puhelinluettelo
 import React from 'react';
 import Note from './components/Note'
 import InputField from './components/InputField'
+import Notification from './components/Notification'
+import personService from './services/persons'
 
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      persons: [
-        { name: 'Arto Hellas',
-          id:'Arto Hellas',
-          number: '12345'
-          //id:1}
-        }
-      ],
+      persons: [],
       newPerson:'',
       newNumber:'',
-      filter:''
+      filter:'',
+      message:''
     }
+  }
+
+
+  componentDidMount() {
+    personService
+      .getAll()
+      .then(response => {
+        this.setState({ persons: response })
+      })
   }
 
 
@@ -26,20 +32,94 @@ class App extends React.Component {
 
     const newDetails = {
       name: this.state.newPerson,
-      // id: this.state.persons.length + 1
-      id: this.state.newPerson,
       number: this.state.newNumber
-    }
-    
-   
+    }    
     const exists = this.state.persons.filter(item => item.name === newDetails.name)
+
+    // tämän nimisiä henkilöitä ei ollut, lisää henkilö
     if (exists.length === 0) {
-      const updated = this.state.persons.concat(newDetails)
-      this.setState({persons:updated, newPerson:'', newNumber:''})
+      personService
+      .create(newDetails)
+      .then(response => {
+        this.setState({
+          persons: this.state.persons.concat(response),
+          newPerson:'',
+          newNumber: '',
+          message: response.name +' lisätty'
+        })
+      })
+      setTimeout(() => {
+        this.setState({message: null})
+      }, 3000)
+
+    // henkilö oli jo luettelossa, mutta numero oli eri
     } else {
-        alert('nimi on jo luettelossa')
+        if (exists[0].number !== newDetails.number) {
+          if(window.confirm('vaihdetaanko numero?')) {
+            // muut luettelossa pysyvät samana, päivitetty listan loppuun
+            const rest = this.state.persons.filter(item => item.name !== newDetails.name) 
+            personService
+            .update(exists[0].id, newDetails)
+            .then(response => {
+              this.setState({
+                persons: rest.concat(response),
+                newPerson:'',
+                newNumber: '',
+                message: 'numero vaihdettu'
+              })
+            })
+            .catch(error => {
+              personService.getAll()
+                .then(response => {
+                 this.setState({
+                   persons: response,
+                  newPerson:'',
+                  newNumber:'',
+                  message:'henkilö ei ollut enää luettelossa' })
+                 })
+            })
+            setTimeout(() => {
+              this.setState({message: null})
+            }, 3000)
+          }
+        }
+        // henkilö oli jo luettelossa ja numero sama
+        else {
+          this.setState({
+            newPerson: '',
+            newNumber: '',
+            message: 'nimi on jo luettelossa'})
+          setTimeout(() => {
+            this.setState({message: null})
+          }, 3000)
+        }
     }
   }
+
+
+  deletePerson = (id) => {
+    return () => {
+      personService
+        .deletion(id)
+        .then(response => {
+          this.setState({
+            persons: this.state.persons.filter(n => n.id !== id),
+            message: 'henkilö poistettu'
+          })
+        })
+        .catch(error => {
+          personService.getAll()
+          .then(response => {
+           this.setState({ persons: response })
+           this.setState({ message:'henkilö ei ollut enää luettelossa' })
+          })
+        })
+      setTimeout(() => {
+        this.setState({message: null})
+      }, 3000)
+    }
+  }
+
 
   handlePersonChange = (event) => {
     this.setState({ newPerson: event.target.value })
@@ -61,6 +141,7 @@ class App extends React.Component {
     return (
       <div>
         <h1>Puhelinluettelo</h1>
+        <Notification message={this.state.message} />
         <h2>Hae nimiä</h2>
         <InputField
           name ={'haku'}
@@ -89,11 +170,14 @@ class App extends React.Component {
         </form>
         <h2>Numerot</h2>
           <div>     
-            {filtered.map(person => <Note key={person.name} note={person.name} number={person.number}/>)}
+            {filtered.map(person => <Note key={person.id} note={person.name} number={person.number}
+            deletePerson={this.deletePerson(person.id)} />)}
           </div>
       </div>
     )
   }
 }
+
+
 
 export default App
