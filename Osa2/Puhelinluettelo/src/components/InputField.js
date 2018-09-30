@@ -1,4 +1,4 @@
-//teht 2.6-2.10, 2.12
+//puhelinluettelo
 import React from 'react'
 
 const InputField = (props) => {
