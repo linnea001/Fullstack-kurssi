@@ -1,0 +1,10 @@
+POST http://localhost:3001/api/blogs
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRhbGx1c3RlbGlqYSIsImlkIjoiNWJkMzdjZjIzMjVhZTgxZDUwOWVhZWM2IiwiaWF0IjoxNTQwNTkzMjYxfQ.H0Ua89BJ7hmKl9449RF4uW9kl1KMvUFgSeqGxUYdZbA
+
+{
+    "title": "EkhartYoga",
+    "author": "Esther Ekhar",
+    "url": "https://www.ekhartyoga.com",
+    "likes": 6
+}
