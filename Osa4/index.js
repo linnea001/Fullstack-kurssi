@@ -11,6 +11,19 @@ const loginRouter = require('./controllers/login')
 const config = require('./utils/config')
 
 
+/* middleware ratkaisu
+const extractToken = (request, response, next) => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    request.token = authorization.substring(7)
+  }
+
+  next()
+}
+
+app.use(extractToken) */
+
+
 app.get('/', (req, res) => {
   res.send('<h1>Blogit</h1>')
 })

@@ -24,6 +24,7 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   try {
     const body = request.body
+    // middleware const token = request.token
     const token = getTokenFrom(request)
     const decodedToken = jwt.verify(token, process.env.SECRET)
 
@@ -31,13 +32,15 @@ blogsRouter.post('/', async (request, response) => {
       return response.status(401).json({ error: 'token missing or invalid' })
     }
 
-    if (body.title === undefined) {
+    if (body.title === undefined || body.title.length === 0)  {
       return response.status(400).json({ error: 'title missing' })
     }
 
-    if (body.url === undefined) {
+    if (body.url === undefined || body.url.length === 0) {
+      console.log('len')
       return response.status(400).json({ error: 'url missing' })
     }
+
 
     const user = await User.findById(decodedToken.id)
     const blog = new Blog({
